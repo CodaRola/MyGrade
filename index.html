@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calcul de Moyenne - Génie Minier</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Lato', sans-serif;
+            background: #f5f1e8;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3em;
+            color: #2d5f3e;
+            font-weight: 700;
+            margin-bottom: 15px;
+            letter-spacing: -1px;
+        }
+
+        .header .subtitle {
+            font-size: 1.1em;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .header .promo {
+            font-size: 0.95em;
+            color: #9ca3af;
+            letter-spacing: 1px;
+        }
+
+        .content {
+            max-height: 70vh;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .content::-webkit-scrollbar-track {
+            background: #e5e7eb;
+            border-radius: 3px;
+        }
+
+        .content::-webkit-scrollbar-thumb {
+            background: #2d5f3e;
+            border-radius: 3px;
+        }
+
+        .selection-screen {
+            display: none;
+        }
+
+        .selection-screen.active {
+            display: block;
+        }
+
+        .selection-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2em;
+            color: #2d5f3e;
+            margin-bottom: 35px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .selection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .selection-card {
+            background: #2d5f3e;
+            color: white;
+            padding: 50px 30px;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            font-size: 1.8em;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(45, 95, 62, 0.2);
+        }
+
+        .selection-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(45, 95, 62, 0.3);
+            background: #3d7a52;
+        }
+
+        .selection-card.active {
+            background: #d4a556;
+            border-color: #2d5f3e;
+            transform: scale(1.05);
+        }
+
+        .btn-next {
+            width: 100%;
+            padding: 18px;
+            background: #2d5f3e;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-next:hover:not(:disabled) {
+            background: #3d7a52;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(45, 95, 62, 0.3);
+        }
+
+        .btn-next:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-back {
+            width: 100%;
+            padding: 14px;
+            background: transparent;
+            color: #6b7280;
+            border: 2px solid #d1d5db;
+            border-radius: 10px;
+            font-size: 1.05em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-back:hover {
+            border-color: #2d5f3e;
+            color: #2d5f3e;
+        }
+
+        .calculation-screen {
+            display: none;
+        }
+
+        .calculation-screen.active {
+            display: block;
+        }
+
+        .semester-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2em;
+            color: #2d5f3e;
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .module-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 5px solid #d4a556;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.2s ease;
+        }
+
+        .module-card:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+            transform: translateY(-2px);
+        }
+
+        .module-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .module-name {
+            font-size: 1.15em;
+            font-weight: 600;
+            color: #1f2937;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .module-coef {
+            background: #d4a556;
+            color: white;
+            padding: 8px 18px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 0.95em;
+        }
+
+        .module-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 18px;
+            margin-top: 18px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            font-size: 0.85em;
+            color: #6b7280;
+            margin-bottom: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-group input {
+            padding: 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1.05em;
+            transition: all 0.3s ease;
+            background: #faf9f7;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #d4a556;
+            background: white;
+        }
+
+        .input-group input::placeholder {
+            color: #9ca3af;
+        }
+
+        .module-moyenne {
+            margin-top: 15px;
+            padding: 14px;
+            background: #f9fafb;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            color: #374151;
+            font-size: 1em;
+            border: 1px solid #e5e7eb;
+        }
+
+        .results-panel {
+            background: #2d5f3e;
+            color: white;
+            padding: 35px;
+            border-radius: 15px;
+            margin-top: 35px;
+            box-shadow: 0 10px 30px rgba(45, 95, 62, 0.3);
+        }
+
+        .results-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .moyenne-generale-value {
+            font-size: 3.5em;
+            font-weight: 800;
+            text-align: center;
+            margin: 25px 0;
+            letter-spacing: -2px;
+        }
+
+        .mention {
+            text-align: center;
+            margin-top: 20px;
+            padding: 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1.15em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .mention.excellent { background: #10b981; }
+        .mention.tres-bien { background: #34d399; }
+        .mention.bien { background: #fbbf24; color: #1f2937; }
+        .mention.passable { background: #f59e0b; }
+        .mention.echec { background: #ef4444; }
+
+        .btn-calculate {
+            width: 100%;
+            padding: 16px;
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.5);
+            border-radius: 10px;
+            font-size: 1.15em;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 25px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-calculate:hover {
+            background: rgba(255,255,255,0.25);
+            border-color: white;
+        }
+
+        .btn-reset {
+            width: 100%;
+            padding: 14px;
+            background: transparent;
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-reset:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: 40px;
+        }
+
+        .footer-signature {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5em;
+            color: #2d5f3e;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+        }
+
+        .footer-text {
+            color: #9ca3af;
+            font-size: 0.95em;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2em; }
+            .selection-grid { grid-template-columns: 1fr; }
+            .module-inputs { grid-template-columns: 1fr; }
+            .moyenne-generale-value { font-size: 2.5em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Calcul de Moyenne</h1>
+            <div class="subtitle">Génie Minier - L2 à M2</div>
+            <div class="promo">UAM Béjaïa</div>
+        </div>
+
+        <div class="content">
+            <div id="screen-niveau" class="selection-screen active">
+                <h2 class="selection-title">Choisissez votre niveau</h2>
+                <div class="selection-grid">
+                    <div class="selection-card" onclick="selectNiveau('L2')">L2</div>
+                    <div class="selection-card" onclick="selectNiveau('L3')">L3</div>
+                    <div class="selection-card" onclick="selectNiveau('M1')">M1</div>
+                    <div class="selection-card" onclick="selectNiveau('M2')">M2</div>
+                </div>
+                <button class="btn-next" id="btn-next-niveau" disabled onclick="goToSemestre()">Suivant →</button>
+            </div>
+
+            <div id="screen-semestre" class="selection-screen">
+                <h2 class="selection-title">Choisissez le semestre</h2>
+                <div class="selection-grid">
+                    <div class="selection-card" onclick="selectSemestre('S1')">Semestre 1</div>
+                    <div class="selection-card" id="s2-card" onclick="selectSemestre('S2')">Semestre 2</div>
+                </div>
+                <button class="btn-next" id="btn-next-semestre" disabled onclick="goToCalculation()">Commencer →</button>
+                <button class="btn-back" onclick="backToNiveau()">← Retour</button>
+            </div>
+
+            <div id="screen-calculation" class="calculation-screen">
+                <h2 class="semester-title" id="calculation-title"></h2>
+                <div id="modules-container"></div>
+                
+                <div class="results-panel">
+                    <h3 class="results-title">Moyenne Générale</h3>
+                    <div class="moyenne-generale-value" id="moyenne-semestre">--</div>
+                    <div id="mention-display" class="mention" style="display:none;"></div>
+                    <button class="btn-calculate" onclick="calculateSemester()">En attente</button>
+                    <button class="btn-reset" onclick="resetAll()">Réinitialiser tout</button>
+                </div>
+                <button class="btn-back" onclick="backToSemestre()" style="margin-top: 20px;">← Retour</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-signature">MHD</div>
+            <div class="footer-text">Développé avec passion ✨</div>
+        </div>
+    </div>
+
+    <script>
+        let selectedNiveau=null,selectedSemestre=null,currentSemesterData=null;
+        const semesterModules={'L2-S1':{title:'Licence 2 - Semestre 1',modules:[{name:'Mathématiques 3',coef:3,hasTD:true,hasExam:true},{name:'Ondes et vibrations',coef:2,hasTD:true,hasExam:true},{name:'Mécanique des fluides',coef:2,hasTD:true,hasExam:true},{name:'Chimie minérale',coef:2,hasTD:true,hasExam:true},{name:'Probabilités et statistiques',coef:2,hasTD:true,hasExam:true},{name:'TP Ondes et vibrations',coef:1,hasTD:true,hasExam:false},{name:'Dessin technique',coef:1,hasTD:true,hasExam:false},{name:'Informatique 3',coef:1,hasTD:true,hasExam:false},{name:'HSE Installations industrielles',coef:1,hasTD:false,hasExam:true},{name:'Réglementation et normes',coef:1,hasTD:false,hasExam:true},{name:'Anglais technique',coef:1,hasTD:false,hasExam:true}]},'L2-S2':{title:'Licence 2 - Semestre 2',modules:[{name:'Valorisation des ressources miniéres',coef:3,hasTD:true,hasExam:true},{name:'Exploitation des mines',coef:2,hasTD:true,hasExam:true},{name:'Mathématiques 4',coef:2,hasTD:true,hasExam:true},{name:'Méthodes numériques',coef:2,hasTD:true,hasExam:true},{name:'Hydrogéologie',coef:2,hasTD:true,hasExam:true},{name:'TP Valorisation des ressources miniéres',coef:1,hasTD:true,hasExam:false},{name:'TP Exploitation des mines',coef:1,hasTD:true,hasExam:false},{name:'TP Méthodes numériques',coef:1,hasTD:true,hasExam:false},{name:'Nomenclature des gisements miniers',coef:1,hasTD:false,hasExam:true},{name:"Gestion de l'environnement minier",coef:1,hasTD:false,hasExam:true},{name:"Techniques d'expression et de communication",coef:1,hasTD:false,hasExam:true}]},'L3-S1':{title:'Licence 3 - Semestre 1',modules:[{name:'Exploitation a ciel ouvert',coef:3,hasTD:true,hasExam:true},{name:'Exploitation souterraine',coef:2,hasTD:true,hasExam:true},{name:'Topographie',coef:2,hasTD:true,hasExam:true},{name:'Minerallurgie',coef:2,hasTD:true,hasExam:true},{name:'Mecanique des roches',coef:2,hasTD:true,hasExam:true},{name:'Outils informatiques miniers',coef:1,hasTD:true,hasExam:false},{name:'TP mecanique des roches',coef:1,hasTD:true,hasExam:false},{name:'Anglais technique',coef:1,hasTD:false,hasExam:true},{name:'Géologie miniere',coef:1,hasTD:false,hasExam:true},{name:'Environnement minier : normes et legislation',coef:1,hasTD:false,hasExam:true},{name:'Bonification des granulats',coef:1,hasTD:false,hasExam:true}]},'L3-S2':{title:'Licence 3 - Semestre 2',modules:[{name:'Géotechnique',coef:3,hasTD:true,hasExam:true},{name:'Electrification des mines',coef:2,hasTD:true,hasExam:true},{name:'Projet de fin de cycle (stage sur site)',coef:2,hasTD:false,hasExam:false,hasPFC:true},{name:'Equipements miniers',coef:2,hasTD:true,hasExam:true},{name:'Aérage des mines',coef:2,hasTD:true,hasExam:true},{name:'Creusement des ouvrages souterrains',coef:2,hasTD:true,hasExam:true},{name:'Sécurite et environemment',coef:1,hasTD:false,hasExam:true},{name:'Economie miniére',coef:1,hasTD:false,hasExam:true},{name:'Notion sur la réhabilitation des sites miniers',coef:1,hasTD:false,hasExam:true},{name:'Entreprenariat et management des entreprises',coef:1,hasTD:false,hasExam:true}]},'M1-S1':{title:'Master 1 - Semestre 1',modules:[{name:'Exploitation a ciel ouvert I',coef:3,hasTD:true,hasExam:true},{name:'Exploitation en souterrain I',coef:2,hasTD:true,hasExam:true},{name:'Recherche operationnelle miniere',coef:2,hasTD:true,hasExam:true},{name:'Topographie',coef:2,hasTD:true,hasExam:true},{name:'Prospection et evaluation des gisements',coef:2,hasTD:true,hasExam:true},{name:'Mecanique des roches',coef:2,hasTD:true,hasExam:true},{name:'TP Mecanique des roches',coef:1,hasTD:true,hasExam:false},{name:'Preparation mecanique des roches',coef:1,hasTD:false,hasExam:true},{name:'Asservissement et regulation',coef:1,hasTD:false,hasExam:true},{name:'Anglais technique et terminologie',coef:1,hasTD:false,hasExam:true}]},'M1-S2':{title:'Master 1 - Semestre 2',modules:[{name:'Exploitation a ciel ouvert II',coef:3,hasTD:true,hasExam:true},{name:'Exploitation en souterrain II',coef:2,hasTD:true,hasExam:true},{name:'Equipements miniers',coef:2,hasTD:true,hasExam:true},{name:'Fragmentation des roches',coef:2,hasTD:true,hasExam:true},{name:'Hydrogeologie',coef:2,hasTD:true,hasExam:true},{name:'Geostatistique',coef:2,hasTD:true,hasExam:true},{name:'Cartographie geologique',coef:1,hasTD:true,hasExam:false},{name:'Electrification des mines',coef:1,hasTD:false,hasExam:true},{name:'Gitologie',coef:1,hasTD:false,hasExam:true},{name:"Respects des normes et des regles d'ethiques",coef:1,hasTD:false,hasExam:true}]},'M2-S1':{title:'Master 2',modules:[{name:'Géotechnique minière',coef:3,hasTD:true,hasExam:true},{name:'Creusement et soutènement des excavations',coef:3,hasTD:true,hasExam:true},{name:'Projet des mines',coef:3,hasTD:true,hasExam:true},{name:'Valorisation des ressources minérales',coef:2,hasTD:true,hasExam:true},{name:'Aérage des mines',coef:2,hasTD:true,hasExam:true},{name:'Logiciel de conception',coef:1,hasTD:true,hasExam:false},{name:'Recherche documentaire et conception de mémoire',coef:1,hasTD:false,hasExam:true},{name:'Géologie générale',coef:1,hasTD:false,hasExam:true},{name:'Management des entreprises',coef:1,hasTD:false,hasExam:true}]}};
+        
+        function selectNiveau(n){selectedNiveau=n;document.querySelectorAll('#screen-niveau .selection-card').forEach(c=>c.classList.remove('active'));event.target.classList.add('active');document.getElementById('btn-next-niveau').disabled=false}
+        function goToSemestre(){document.getElementById('screen-niveau').classList.remove('active');document.getElementById('screen-semestre').classList.add('active');document.getElementById('s2-card').style.display=selectedNiveau==='M2'?'none':'block'}
+        function selectSemestre(s){selectedSemestre=s;document.querySelectorAll('#screen-semestre .selection-card').forEach(c=>c.classList.remove('active'));event.target.classList.add('active');document.getElementById('btn-next-semestre').disabled=false}
+        function goToCalculation(){let k=selectedNiveau+'-'+selectedSemestre;if(selectedNiveau==='M2')k='M2-S1';currentSemesterData=semesterModules[k];document.getElementById('screen-semestre').classList.remove('active');document.getElementById('screen-calculation').classList.add('active');document.getElementById('calculation-title').textContent=currentSemesterData.title;generateModules()}
+        function generateModules(){const c=document.getElementById('modules-container');c.innerHTML='';currentSemesterData.modules.forEach((m,i)=>{const d=document.createElement('div');d.className='module-card';let h='';if(m.hasPFC)h+=`<div class="input-group"><label>Note PFC / 20</label><input type="number" min="0" max="20" step="0.01" placeholder="--" data-module="${i}" data-type="pfc" oninput="calculateModuleMoyenne(${i})"></div>`;else{if(m.hasTD)h+=`<div class="input-group"><label>Note TD / 20</label><input type="number" min="0" max="20" step="0.01" placeholder="--" data-module="${i}" data-type="td" oninput="calculateModuleMoyenne(${i})"></div>`;if(m.hasExam)h+=`<div class="input-group"><label>Note Examen / 20</label><input type="number" min="0" max="20" step="0.01" placeholder="--" data-module="${i}" data-type="exam" oninput="calculateModuleMoyenne(${i})"></div>`}d.innerHTML=`<div class="module-header"><div class="module-name">${m.name}</div><div class="module-coef">Coef. ${m.coef}</div></div><div class="module-inputs">${h}</div><div class="module-moyenne" id="module-moy-${i}">Moyenne du module<br>--</div>`;c.appendChild(d)})}
+        
+        function calculateModuleMoyenne(i){const m=currentSemesterData.modules[i];const td=document.querySelector(`input[data-module="${i}"][data-type="td"]`);const ex=document.querySelector(`input[data-module="${i}"][data-type="exam"]`);const pfc=document.querySelector(`input[data-module="${i}"][data-type="pfc"]`);let avg=null;if(pfc){const p=parseFloat(pfc.value);if(!isNaN(p))avg=p}else if(td&&ex){const t=parseFloat(td.value);const e=parseFloat(ex.value);if(!isNaN(t)&&!isNaN(e))avg=t*0.4+e*0.6;else if(!isNaN(t))avg=t;else if(!isNaN(e))avg=e}else if(td){const t=parseFloat(td.value);if(!isNaN(t))avg=t}else if(ex){const e=parseFloat(ex.value);if(!isNaN(e))avg=e}document.getElementById(`module-moy-${i}`).innerHTML=avg!==null?`Moyenne du module<br><strong>${avg.toFixed(2)}</strong>`:'Moyenne du module<br>--';calculateSemester()}
+        
+        function calculateSemester(){let tp=0,tc=0;currentSemesterData.modules.forEach((m,i)=>{const td=document.querySelector(`input[data-module="${i}"][data-type="td"]`);const ex=document.querySelector(`input[data-module="${i}"][data-type="exam"]`);const pfc=document.querySelector(`input[data-module="${i}"][data-type="pfc"]`);let avg=null;if(pfc){const p=parseFloat(pfc.value);if(!isNaN(p))avg=p}else if(td&&ex){const t=parseFloat(td.value);const e=parseFloat(ex.value);if(!isNaN(t)&&!isNaN(e))avg=t*0.4+e*0.6;else if(!isNaN(t))avg=t;else if(!isNaN(e))avg=e}else if(td){const t=parseFloat(td.value);if(!isNaN(t))avg=t}else if(ex){const e=parseFloat(ex.value);if(!isNaN(e))avg=e}if(avg!==null){tp+=avg*m.coef;tc+=m.coef}});const ms=document.getElementById('moyenne-semestre');const md=document.getElementById('mention-display');if(tc>0){const a=tp/tc;ms.textContent=a.toFixed(2);let men='',mc='';if(a>=16){men='Très Bien';mc='excellent'}else if(a>=14){men='Bien';mc='tres-bien'}else if(a>=12){men='Assez Bien';mc='bien'}else if(a>=10){men='Passable';mc='passable'}else{men='Échec';mc='echec'}md.textContent=men;md.className='mention '+mc;md.style.display='block'}else{ms.textContent='--';md.style.display='none'}}
+        
+        function resetAll(){document.querySelectorAll('input[type="number"]').forEach(input=>input.value='');document.querySelectorAll('.module-moyenne').forEach(div=>div.innerHTML='Moyenne du module<br>--');document.getElementById('moyenne-semestre').textContent='--';document.getElementById('mention-display').style.display='none'}
+        
+        function backToNiveau(){document.getElementById('screen-semestre').classList.remove('active');document.getElementById('screen-niveau').classList.add('active');selectedSemestre=null;document.getElementById('btn-next-semestre').disabled=true;document.querySelectorAll('#screen-semestre .selection-card').forEach(c=>c.classList.remove('active'))}
+        function backToSemestre(){document.getElementById('screen-calculation').classList.remove('active');document.getElementById('screen-semestre').classList.add('active');resetAll()}
+    </script>
+</body>
+</html>
